@@ -63,23 +63,21 @@ svg text.content {
       console.log("click map")
       let tools = e.sourceTarget.editTools;
       if (map.currentEditor) {
-        console.log(map.currentEditor.feature.scale());
         map.currentEditor.disable();
       }
     });
 
-    var bounds = L.latLngBounds([[52.5087, 13.427524566650392], [52.50232211506205, 13.4093]]);
-    //var bounds = L.latLngBounds([[52.50483712621978,13.4093],[52.5087,13.427524566650392]]);
-    //var bounds = L.latLngBounds([[52.4991,13.4093], [52.5087,13.4276]]);
-    const label = 'Gegenkundgebung'
-    const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
-    let textBox = new L.svgLabelledTextBox(bounds, label, text).addTo(map)
-    textBox.on('click', e => {
-      textBox.enableEdit();
-      map.currentEditor = textBox.editor;
-    });
-
-    var marker = L.circleMarker(bounds.getCenter()).addTo(map);
+    for (var i=0; i < 20; ++i) {
+      const scale = i+1;
+      const label = 'Gegenkundgebung #'+scale
+      const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
+      var point = L.latLng(52.5087+(i/100)*scale, 13.427524566650392)
+      let textBox = L.svgLabelledTextBox(point, scale, label, text).addTo(map)
+      textBox.on('click', e => {
+        textBox.enableEdit();
+        map.currentEditor = textBox.editor;
+      });
+    }
   </script>
 </html>
 

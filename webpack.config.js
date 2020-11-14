@@ -4,7 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './leaflet-text-overlay.js',
+  entry: './editor.js',
   mode: 'development',
   output: {
     filename: '[name].bundle.js',

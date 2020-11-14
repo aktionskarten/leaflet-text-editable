@@ -21,14 +21,13 @@ L.Editable.include({
   },
   startSVGTextBox(latlng, options) {
     const corner = latlng || L.latLng([0, 0]);
-    const bounds = new L.LatLngBounds(corner, corner);
+    const bounds = L.latLngBounds(corner, corner);
     const textBox = this.createSVGTextBox(bounds, options);
     textBox.enableEdit(this.map).startDrawing();
     return textBox;
   }
 });
 
-//L.Editable.SVGTextBoxEditor = L.Editable.RectangleEditor.extend({
 L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
   initialize: function(map, feature, options) {
     L.Editable.RectangleEditor.prototype.initialize.call(this, map, feature, options);
@@ -53,19 +52,10 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
     const inputText = document.getElementById('textboxLabel');
     const textbox = document.getElementById('textbox');
 
-    feature.on('editable:drawing:commit', e=> {
-      console.log("editor commit");
-      this.updateRatio();
-    });
-
-    feature.on('resize', (e)=> {
-      console.log('feature resize in editor')
-      this.updateRatio();
-    });
+    feature.on('editable:drawing:commit', this.updateRatio, this);
+    feature.on('text:update', this.updateRatio, this);
 
     feature.on('editable:enable', e=> {
-      console.log("editor enable");
-
       // input style
       feature.setStyle({fillColor: 'transparent', color: feature.color(),  stroke: true});
       container.style.display = 'flex';
@@ -84,8 +74,6 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
     });
 
     feature.on('editable:disable', e=> {
-      console.log("editor disable");
-
       // restore input style
       feature.setStyle({color: 'transparent'});
       container.style.display = 'none';
@@ -119,31 +107,22 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
 
   updateRatio() {
     this.ratio = this.feature.svgText.getRatio();
-    console.log("updateratio", this.ratio)
-  },
-
-  extendBounds(e) {
-    console.log("editor extend ratio");
-    this.updateRatio();
-    ScaledRectangleEditor.prototype.extendBounds.call(this, e);
-    this.feature.overlay.setBounds(bounds)
   },
 
   update() {
-    console.log("update");
+    this.updateRatio();
+
     let bounds = this.feature.getBounds();
     const size = this.feature.getSize();
-    const svgRatio = this.feature.svgText.getRatio();
     const northWest = bounds.getNorthWest();
 
     // Keep the inner bbox in the same ratio as our rectangle on changes
     // (like when you type someting which without resizing would exceed the
     // limits
     const topLeft = this.map.latLngToLayerPoint(northWest);
-    const bottomRight = L.point(topLeft.x+size.x, topLeft.y+(size.x*svgRatio))
+    const bottomRight = L.point(topLeft.x+size.x, topLeft.y+(size.x*this.ratio))
     const southEast = this.map.layerPointToLatLng(bottomRight);
     bounds = L.latLngBounds(northWest, southEast);
-    this.ratio = svgRatio;
 
     this.updateBounds(bounds);
     this.updateLatLngs(bounds);

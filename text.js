@@ -3,14 +3,13 @@ import 'leaflet'
 
 const SVGText = L.Evented.extend({
   svg: null,
-  debug: true,
+  debug: false,
 
   initialize: function(options) {
     options = options || {};
     this.svg = this._createSVG(50, 100)
     this.svg.setAttribute('overflow', 'visible')
     this.color = options.color || '#FF0000';
-    this.lineHeight = 1
     this.setLabel('Headline')
     this.setText('Dummy content')
   },
@@ -33,14 +32,14 @@ const SVGText = L.Evented.extend({
     if (this.label) {
       const coords = [[2,2,],[2,-2],[-2,2],[-2,-2]];
       const shadows = coords.map(coords => `${coords[0]}px ${coords[1]}px 5px ${this.color}`);
-      innerHTML += `<text y="${this.lineHeight}em" class="label" style="text-shadow: ${shadows.join(',')}"><tspan>${this.label}</tspan></text>`
+      innerHTML += `<text y="1em" class="label" style="text-shadow: ${shadows.join(',')}"><tspan>${this.label}</tspan></text>`
     }
 
     // content
     if (this.text) {
       const lines = this.text.split('\n');
-      const tspans = lines.map(line => `<tspan x="0" dy="${this.lineHeight}em">${line.length>0?line:'&nbsp;'}</tspan>`);
-      innerHTML += `<text x="0" y="2em" class="content">${tspans.join('')}</text>`
+      const tspans = lines.map(line => `<tspan x="0" dy="1em">${line.length>0?line:'&nbsp;'}</tspan>`);
+      innerHTML += `<text x="0" y="1.5em" class="content">${tspans.join('')}</text>`
     }
 
     elem.innerHTML = innerHTML;
@@ -53,9 +52,7 @@ const SVGText = L.Evented.extend({
     let sizes = this.getSize();
     this.svg.setAttribute('viewBox', `0 0 ${sizes.x} ${sizes.y}`);
 
-    console.log("rendered");
-
-    this.fire('resize', this.getRatio());
+    this.fire('text:update', this.getRatio());
 
     return this;
   },
@@ -109,13 +106,16 @@ const SVGText = L.Evented.extend({
 
 
 const SVGTextBox = L.Rectangle.extend({
-  initialize(bounds, options) {
+  initialize(latlng, scale, options) {
+    console.log("initialize", latlng, options)
     options = options || {}
 
     this.svgText = new SVGText()
+    this.scale = scale || 1;
 
     // Use embedded text functionaliy of SVG element to render text
     // Display it then with help of SVG overlay.
+    const bounds = L.latLngBounds(latlng, latlng);
     this.overlay = L.svgOverlay(this.svgText.svg, bounds, options);
 
     // Rectangle for resizing text
@@ -124,64 +124,33 @@ const SVGTextBox = L.Rectangle.extend({
 
     // add/remove overlay automatically
     this.on('add',(e) => {
-
-      let bounds = this.getBounds();
-      const scale = this.scale()
-      const northWest = bounds.getNorthWest()
-      const topLeft = this._map.latLngToLayerPoint(northWest);
-      const svgSize = this.svgText.getSize().multiplyBy(scale);
-      const bottomRight = topLeft.add(svgSize);
-      const southEast = this._map.layerPointToLatLng(bottomRight);
-      bounds = L.latLngBounds(northWest, southEast);
-      this.setBounds(bounds);
-      this.overlay.setBounds(bounds);
-
+      this.refresh();
       this.overlay.addTo(this._map)
-      //this.svgText.redraw();
-      //this.svgText.setSize(this.getSize());
-      console.log("added", scale);
     })
     //this.on('remove',(e) => this.overlay.remove())
 
-    // Update bounds of rectangle if svg changes
-    this.svgText.on('resize', this.fire, this);
-    this.svgText.on('resize', (e)=>{
-      //this.setBounds();
-      //this.redraw();
-    });
+    // Bubble change events up
+    this.svgText.on('text:update', this.fire, this);
+  },
+
+  refresh() {
+    this.setBounds(this.getBounds())
   },
 
   setBounds(bounds) {
-    bounds = bounds || this._bounds;
-
-    console.log("feature set Bounds")
-
-    const size = this.getSize();
-    if (!size.x || !size.y) {
-      console.warn("invalid size");
+    if (bounds.equals(L.latLngBounds([[0,0], [0,0]]))) {
+      console.warn("invalid bounds");
       return;
     }
 
-    const svgRatio = this.svgText.getRatio();
     const northWest = bounds.getNorthWest();
-
-    // Keep the inner bbox in the same ratio as our rectangle on changes
-    // (like when you type someting which without resizing would exceed the
-    // limits
     const topLeft = this._map.latLngToLayerPoint(northWest);
-    const bottomRight = L.point(topLeft.x+size.x, topLeft.y+(size.x*svgRatio))
+    const svgSize = this.svgText.getSize().multiplyBy(this.scale);
+    const bottomRight = topLeft.add(svgSize);
     const southEast = this._map.layerPointToLatLng(bottomRight);
     bounds = L.latLngBounds(northWest, southEast);
-
-    this.overlay.setBounds(bounds);
     L.Rectangle.prototype.setBounds.call(this, bounds);
-  },
-
-  scale() {
-    const scale = Math.pow(2, this._map.getZoom());
-    const scaledSizes = this.getSize().divideBy(scale);
-    const scaledRatio = scaledSizes.scaleBy(this.svgText.getSize())
-    return scaledRatio.x/this.svgText.getRatio();
+    this.overlay.setBounds(bounds);
   },
 
   redraw() {
@@ -224,7 +193,7 @@ const SVGTextBox = L.Rectangle.extend({
     if (!this._map) {
       return L.point(0,0);
     }
-    const bounds = this.getBounds();
+    const bounds = this._bounds;
     const bottomLeft = this._map.latLngToLayerPoint(bounds.getSouthWest());
     const topRight = this._map.latLngToLayerPoint(bounds.getNorthEast());
     const width = Math.abs(bottomLeft.x-topRight.x);
@@ -236,6 +205,6 @@ const SVGTextBox = L.Rectangle.extend({
 
 const svgText = (text, options) => new SVGText(text, options)
 const svgTextBox = (bounds, text, options) => (new SVGTextBox(bounds, options)).setText(text)
-const svgLabelledTextBox = (bounds, label, text, options) => (new SVGTextBox(bounds, options)).setLabel(label).setText(text)
+const svgLabelledTextBox = (bounds, scale, label, text, options) => (new SVGTextBox(bounds, scale, options)).setLabel(label).setText(text)
 
 export {svgLabelledTextBox, svgTextBox, SVGTextBox, svgText, SVGText}

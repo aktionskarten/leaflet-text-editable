@@ -11,7 +11,6 @@ const ScaledRectangleEditor = L.Editable.RectangleEditor.extend({
     return this.enforceRatio(e.vertex, e.latlng);
   },
   enforceRatio(selected, newLatLng) {
-    console.log("enforce ratio");
     selected  = selected || this.getLatLngs()[0][0].__vertex;
     newLatLng = newLatLng || selected.getLatLng();
 
