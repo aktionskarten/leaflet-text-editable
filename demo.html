@@ -1,0 +1,85 @@
+<html>
+  <head>
+<style>
+svg text.label {
+  color: "#fff";
+  stroke: 'black';
+  fill: white
+}
+svg text.content {
+  text-shadow: 5px 5px 10px #fff, 5px -5px 5px #fff, -5px 5px 5px #fff,-5px -5px 5px #fff;
+}
+</style>
+  </head>
+  <body style="margin:0;padding:0">
+    <div id="container" style="display: none; width: 100%; height: 50px">
+      <input id="textboxColor" type="color" style="height:100%">
+      <input id="textboxLabel" type="text" style="height:100%">
+      <textarea id="textbox" style="display:block;width:100%">Type in your stuff</textarea>
+    </div>
+    <div id="map" style="width:100%; height: 100%"></div>
+  </body>
+  <script>
+    var map = L.map('map', {editable: true});
+
+    map.setView([52.5069,13.4298], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      detectRetina: true,
+      attribution: 'Tiles &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a> '
+    }).addTo(map);
+
+    let SVGControl = L.Control.extend({
+      options: {
+        kind: 'text',
+        title: '',
+        html: '',
+        position: 'topleft',
+      },
+      onAdd(map) {
+        let container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-toolbar-editable');
+        let link = L.DomUtil.create('a', 'leaflet-toolbar-editable-'+this.options.kind, container);
+
+        link.href = '#';
+        link.title = this.options.title;
+        link.innerHTML = '<span class="leaflet-toolbar-editable-' + this.options.kind + '"></span>' + 'Text';
+
+        L.DomEvent.on(container, 'click', L.DomEvent.stop)
+                  .on(container, 'click', ()=> this.callback(map.editTools))
+        L.DomEvent.disableClickPropagation(container);
+
+        return container;
+      },
+      callback(editable) {
+        return editable.startSVGTextBox();
+      }
+    });
+
+    map.addControl(new SVGControl());
+
+    map.on('click', e => {
+      console.log("click map")
+      let tools = e.sourceTarget.editTools;
+      if (map.currentEditor) {
+        console.log(map.currentEditor.feature.scale());
+        map.currentEditor.disable();
+      }
+    });
+
+    var bounds = L.latLngBounds([[52.5087, 13.427524566650392], [52.50232211506205, 13.4093]]);
+    //var bounds = L.latLngBounds([[52.50483712621978,13.4093],[52.5087,13.427524566650392]]);
+    //var bounds = L.latLngBounds([[52.4991,13.4093], [52.5087,13.4276]]);
+    const label = 'Gegenkundgebung'
+    const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
+    let textBox = new L.svgLabelledTextBox(bounds, label, text).addTo(map)
+    textBox.on('click', e => {
+      textBox.enableEdit();
+      map.currentEditor = textBox.editor;
+    });
+
+    var marker = L.circleMarker(bounds.getCenter()).addTo(map);
+  </script>
+</html>
+

@@ -1,0 +1,38 @@
+{
+  "name": "leaflet-text-overlay",
+  "version": "0.0.0",
+  "description": "foobar",
+  "main": "src/index.js",
+  "dependencies": {
+    "leaflet": "^1.7.1",
+    "leaflet-editable": "^1.2.0",
+    "leaflet-path-drag": "^1.1.0"
+  },
+  "devDependencies": {
+    "@ava/babel-preset-stage-4": "^4.0.0",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-transform-runtime": "^7.12.1",
+    "@babel/plugin-transform-template-literals": "^7.12.1",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/register": "^7.12.1",
+    "@babel/runtime": "^7.12.1",
+    "babel-loader": "^8.1.0",
+    "clean-webpack-plugin": "^0.1.19",
+    "cross-env": "^5.2.1",
+    "css-loader": "^2.1.1",
+    "file-loader": "^1.1.11",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^1.3.0",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
+    "build": "webpack --mode=production --progress --hide-modules"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
