@@ -127,7 +127,7 @@ const SVGTextBox = L.Rectangle.extend({
       this.refresh();
       this.overlay.addTo(this._map)
     })
-    //this.on('remove',(e) => this.overlay.remove())
+    this.on('remove',(e) => this.overlay.remove())
 
     // Bubble change events up
     this.svgText.on('text:update', this.fire, this);
@@ -204,7 +204,7 @@ const SVGTextBox = L.Rectangle.extend({
 
 
 const svgText = (text, options) => new SVGText(text, options)
-const svgTextBox = (bounds, text, options) => (new SVGTextBox(bounds, options)).setText(text)
-const svgLabelledTextBox = (bounds, scale, label, text, options) => (new SVGTextBox(bounds, scale, options)).setLabel(label).setText(text)
+const svgTextBox = (latlng, text, options) => (new SVGTextBox(latlng, options)).setText(text)
+const svgLabelledTextBox = (latlng, scale, label, text, options) => (new SVGTextBox(latlng, scale, options)).setLabel(label).setText(text)
 
 export {svgLabelledTextBox, svgTextBox, SVGTextBox, svgText, SVGText}
