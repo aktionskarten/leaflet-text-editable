@@ -1,16 +1,7 @@
-<html>
-  <head>
-    <title>Demo</title>
-  </head>
-  <body style="margin:0;padding:0">
-    <div id="container" style="display: none; width: 100%; height: 50px">
-      <input id="textboxColor" type="color" style="height:100%">
-      <input id="textboxLabel" type="text" style="height:100%">
-      <textarea id="textboxContent" style="display:block;width:100%">Type in your stuff</textarea>
-    </div>
-    <div id="map" style="width:100%; height: 100%"></div>
-  </body>
-  <script>
+import L from '@/editor.js'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet-path-drag'
+
 const map = L.map('map', {editable: true});
 
 map.setView([52.5069,13.4298], 15);
@@ -122,6 +113,3 @@ map.whenReady(function() {
     });
   }
 });
-  </script>
-</html>
-

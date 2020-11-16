@@ -1,6 +1,8 @@
 import 'leaflet'
 import 'leaflet-editable'
 
+// TODO: Move to own package
+
 //
 // ScaledRectangleEditor
 //
