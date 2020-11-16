@@ -1,5 +1,5 @@
 {
-  "name": "leaflet-text-svg",
+  "name": "leaflet-text-editable",
   "version": "0.0.0",
   "description": "Text support through embedded SVGs",
   "main": "src/editor.js",
@@ -30,7 +30,7 @@
     "dev": "webpack serve",
     "build": "webpack --mode=production --progress"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["leaflet", "leaflet-editable", "text"],
+  "author": "Aktionskarten",
   "license": "MIT"
 }
