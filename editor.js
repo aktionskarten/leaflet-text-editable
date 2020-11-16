@@ -116,7 +116,7 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
 
     // Keep the inner bbox in the same ratio as our rectangle on changes
     // (like when you type someting which without resizing would exceed the
-    // limits
+    // limits)
     const topLeft = this.map.latLngToLayerPoint(northWest);
     const bottomRight = L.point(topLeft.x+size.x, topLeft.y+(size.x*this.ratio))
     const southEast = this.map.layerPointToLatLng(bottomRight);
