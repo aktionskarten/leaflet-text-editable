@@ -22,7 +22,7 @@ svg text.content {
   <script>
     var map = L.map('map', {editable: true});
 
-    map.setView([52.5069,13.4298], 13);
+    map.setView([52.5069,13.4298], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
@@ -67,9 +67,9 @@ svg text.content {
       }
     });
 
-    for (var i=0; i < 20; ++i) {
-      const scale = i+1;
-      const label = 'Gegenkundgebung #'+scale
+    for (var i=0; i < 50; ++i) {
+      const scale = (i+1)/10;
+      const label = 'Gegenkundgebung #'+(i+1)
       const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
       var point = L.latLng(52.5087+(i/100)*scale, 13.427524566650392)
       let textBox = L.svgLabelledTextBox(point, scale, label, text).addTo(map)

@@ -1,17 +1,25 @@
 //http://www.crmarsh.com/svg-performance/
 import 'leaflet'
 
-const SVGText = L.Evented.extend({
+
+
+
+const SVGText = L.SVGOverlay.extend({
   svg: null,
   debug: false,
 
-  initialize: function(options) {
+  initialize: function(bounds, options) {
     options = options || {};
     this.svg = this._createSVG(50, 100)
     this.svg.setAttribute('overflow', 'visible')
     this.color = options.color || '#FF0000';
+
     this.setLabel('Headline')
     this.setText('Dummy content')
+
+    L.SVGOverlay.prototype.initialize.call(this, this.svg, bounds, options);
+
+    this.on('add', this.redraw, this);
   },
 
   _createSVG(width, height) {
@@ -28,7 +36,8 @@ const SVGText = L.Evented.extend({
       innerHTML += `<rect style="fill:none; stroke: black" x="0" y="0" width="100%" height="100%" />\n`
     }
 
-    // label
+    // label (with colored halo effect powered by css (as svg filters don't
+    // perform well)
     if (this.label) {
       const coords = [[2,2,],[2,-2],[-2,2],[-2,-2]];
       const shadows = coords.map(coords => `${coords[0]}px ${coords[1]}px 5px ${this.color}`);
@@ -82,6 +91,10 @@ const SVGText = L.Evented.extend({
   },
 
   getSize() {
+    if (!this._map) {
+      return L.point(0, 0);
+    }
+
     // use viewbox which is definitely too small, so the resulting bbox will
     // exceed the viewbox sizes. Through this we end up with the minimized bbox
     // of our svg
@@ -90,47 +103,51 @@ const SVGText = L.Evented.extend({
     // don't actually show our intermediate svg
     elem.setAttribute('visibility', 'hidden')
 
-    const map = document.getElementById('map')
-    map.appendChild(elem)
+    const container = this._map._container
+    container.appendChild(elem)
     this.render(elem);
     const bbox = elem.getBBox();
-    map.removeChild(elem)
+    container.removeChild(elem)
+
     return L.point(bbox.width, bbox.height);
   },
 
   getRatio() {
     const sizes = this.getSize();
+    if (sizes.x == 0) {
+      return 1;
+    }
     return sizes.y/sizes.x;
   },
 });
 
 
+
+
 const SVGTextBox = L.Rectangle.extend({
   initialize(latlng, scale, options) {
-    console.log("initialize", latlng, options)
     options = options || {}
 
-    this.svgText = new SVGText()
     this.scale = scale || 1;
 
     // Use embedded text functionaliy of SVG element to render text
     // Display it then with help of SVG overlay.
     const bounds = L.latLngBounds(latlng, latlng);
-    this.overlay = L.svgOverlay(this.svgText.svg, bounds, options);
+    this.overlay = new SVGText(bounds)
 
     // Rectangle for resizing text
     options['color'] = "transparent"
     L.Rectangle.prototype.initialize.call(this, bounds, options);
 
     // add/remove overlay automatically
+    this.on('remove', this.overlay.remove, this)
     this.on('add',(e) => {
-      this.refresh();
       this.overlay.addTo(this._map)
+      this.refresh();
     })
-    this.on('remove',(e) => this.overlay.remove())
 
     // Bubble change events up
-    this.svgText.on('text:update', this.fire, this);
+    this.overlay.on('text:update', this.fire, this);
   },
 
   refresh() {
@@ -139,18 +156,20 @@ const SVGTextBox = L.Rectangle.extend({
 
   setBounds(bounds) {
     if (bounds.equals(L.latLngBounds([[0,0], [0,0]]))) {
+      console.log("bounds", bounds)
       console.warn("invalid bounds");
       return;
     }
 
     const northWest = bounds.getNorthWest();
     const topLeft = this._map.latLngToLayerPoint(northWest);
-    const svgSize = this.svgText.getSize().multiplyBy(this.scale);
+    const svgSize = this.overlay.getSize().multiplyBy(this.scale);
     const bottomRight = topLeft.add(svgSize);
     const southEast = this._map.layerPointToLatLng(bottomRight);
     bounds = L.latLngBounds(northWest, southEast);
-    L.Rectangle.prototype.setBounds.call(this, bounds);
     this.overlay.setBounds(bounds);
+
+    L.Rectangle.prototype.setBounds.call(this, bounds);
   },
 
   redraw() {
@@ -162,29 +181,29 @@ const SVGTextBox = L.Rectangle.extend({
   },
 
   label() {
-    return this.svgText.label;
+    return this.overlay.label;
   },
 
   text() {
-    return this.svgText.text;
+    return this.overlay.text;
   },
 
   setLabel(text) {
-    this.svgText.setLabel(text);
+    this.overlay.setLabel(text);
     return this;
   },
 
   setText(text) {
-    this.svgText.setText(text);
+    this.overlay.setText(text);
     return this;
   },
 
   color() {
-    return this.svgText.color;
+    return this.overlay.color;
   },
 
   setColor(color) {
-    this.svgText.setColor(color);
+    this.overlay.setColor(color);
     this.setStyle({color: color});
     return this;
   },
@@ -193,11 +212,13 @@ const SVGTextBox = L.Rectangle.extend({
     if (!this._map) {
       return L.point(0,0);
     }
+
     const bounds = this._bounds;
     const bottomLeft = this._map.latLngToLayerPoint(bounds.getSouthWest());
     const topRight = this._map.latLngToLayerPoint(bounds.getNorthEast());
     const width = Math.abs(bottomLeft.x-topRight.x);
     const height = Math.abs(bottomLeft.y-topRight.y);
+
     return L.point(width, height);
   }
 });

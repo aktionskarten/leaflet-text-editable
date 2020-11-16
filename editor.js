@@ -43,7 +43,6 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
       if (!feature.editEnabled()) {
         feature.enableEdit(map);
       }
-      console.log('bound',feature.getBounds().toBBoxString())
       L.DomEvent.stopPropagation(e)
     });
 
@@ -52,7 +51,8 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
     const inputText = document.getElementById('textboxLabel');
     const textbox = document.getElementById('textbox');
 
-    feature.on('editable:drawing:commit', this.updateRatio, this);
+    // Once the text is added or changes, we need to adjust our editor rectangle 
+    feature.on('add', this.updateRatio, this);
     feature.on('text:update', this.updateRatio, this);
 
     feature.on('editable:enable', e=> {
@@ -60,12 +60,12 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
       feature.setStyle({fillColor: 'transparent', color: feature.color(),  stroke: true});
       container.style.display = 'flex';
 
+      this.updateRatio();
+
       // prefill values
       inputText.value = feature.label();
       textbox.value = feature.text();
       inputColor.value = feature.color();
-
-      this.updateRatio();
 
       // register listeners for inputs
       L.DomEvent.addListener(inputColor, 'input', this.onColorChange, this);
@@ -84,29 +84,27 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
       L.DomEvent.removeListener(textbox, 'keyup', this.onTextChange, this);
     });
 
+    // Leaflet-Path-Drag support
     feature.on('drag', feature.redraw, feature);
   },
 
   onColorChange(e) {
     const color = e.target.value;
     this.feature.setColor(color);
-    L.DomEvent.stopPropagation(e)
   },
 
   onLabelChange(e) {
     this.feature.setLabel(e.target.value);
     this.update();
-    L.DomEvent.stopPropagation(e)
   },
 
   onTextChange(e) {
     this.feature.setText(e.target.value);
     this.update();
-    L.DomEvent.stopPropagation(e)
   },
 
   updateRatio() {
-    this.ratio = this.feature.svgText.getRatio();
+    this.ratio = this.feature.overlay.getRatio();
   },
 
   update() {
