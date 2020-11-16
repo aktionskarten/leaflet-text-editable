@@ -1,15 +1,6 @@
 <html>
   <head>
-<style>
-svg text.label {
-  color: "#fff";
-  stroke: 'black';
-  fill: white
-}
-svg text.content {
-  text-shadow: 5px 5px 10px #fff, 5px -5px 5px #fff, -5px 5px 5px #fff,-5px -5px 5px #fff;
-}
-</style>
+    <title>Demo</title>
   </head>
   <body style="margin:0;padding:0">
     <div id="container" style="display: none; width: 100%; height: 50px">
@@ -20,119 +11,117 @@ svg text.content {
     <div id="map" style="width:100%; height: 100%"></div>
   </body>
   <script>
-    var map = L.map('map', {editable: true});
+const map = L.map('map', {editable: true});
 
-    map.setView([52.5069,13.4298], 15);
+map.setView([52.5069,13.4298], 15);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      detectRetina: true,
-      attribution: 'Tiles &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a> '
-    }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  detectRetina: true,
+  attribution: 'Tiles &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a> '
+}).addTo(map);
 
-    let SVGControl = L.Control.extend({
-      options: {
-        kind: 'text',
-        title: '',
-        html: '',
-        position: 'topleft',
-      },
-      onAdd(map) {
-        let container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-toolbar-editable');
-        let link = L.DomUtil.create('a', 'leaflet-toolbar-editable-'+this.options.kind, container);
+const SVGControl = L.Control.extend({
+  options: {
+    kind: 'text',
+    title: '',
+    html: '',
+    position: 'topleft',
+  },
+  onAdd(map) {
+    const container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-toolbar-editable');
+    const link = L.DomUtil.create('a', 'leaflet-toolbar-editable-'+this.options.kind, container);
 
-        link.href = '#';
-        link.title = this.options.title;
-        link.innerHTML = '<span class="leaflet-toolbar-editable-' + this.options.kind + '"></span>' + 'Text';
+    link.href = '#';
+    link.title = this.options.title;
+    link.innerHTML = '<span class="leaflet-toolbar-editable-' + this.options.kind + '"></span>' + 'Text';
 
-        L.DomEvent.on(container, 'click', L.DomEvent.stop)
-                  .on(container, 'click', ()=> this.callback(map.editTools))
-        L.DomEvent.disableClickPropagation(container);
+    L.DomEvent.on(container, 'click', L.DomEvent.stop)
+              .on(container, 'click', ()=> this.callback(map.editTools))
+    L.DomEvent.disableClickPropagation(container);
 
-        return container;
-      },
-      callback(editable) {
-        return editable.startSVGTextBox();
-      }
-    });
+    return container;
+  },
+  callback(editable) {
+    return editable.startSVGTextBox();
+  }
+});
 
-    map.addControl(new SVGControl());
+map.addControl(new SVGControl());
 
-    // disable editor if you click on the map
-    map.on('click', e => {
-      console.log("click map")
-      let tools = e.sourceTarget.editTools;
+// disable editor if you click on the map
+map.on('click', e => {
+  console.log("click map")
+  let tools = e.sourceTarget.editTools;
+  if (map.currentEditor) {
+    map.currentEditor.disable();
+  }
+});
+
+const bounds = [
+  [[52.508890523658664,13.430936336517334],[52.50810470224378,13.427524566650392]],
+  [[52.50998775888057,13.444347381591799],[52.50611297738362,13.427524566650392]],
+]
+
+map.whenReady(function() {
+  for (let i=0; i < bounds.length; ++i) {
+    const label = 'Gegenkundgebung #'+(i+1)
+    const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
+    const [a,b] = bounds[i];
+    const bounds_ = L.latLngBounds(a,b);
+    let textBox = L.svgLabelledTextBox(bounds_, label, text).addTo(map)
+
+    // enable editor on click
+    textBox.on('click', e => {
       if (map.currentEditor) {
         map.currentEditor.disable();
       }
+      console.log("click feature")
+      textBox.enableEdit();
+      map.currentEditor = textBox.editor;
+      L.DomEvent.stopPropagation(e)
     });
 
-bounds = [
-  [52.508890523658664,13.430936336517334,52.50810470224378,13.427524566650392],
-  [52.50998775888057,13.444347381591799,52.50611297738362,13.427524566650392],
-]
+    textBox.on('add', e => {
+      console.log("added feature")
+      this.map.currentEditor = this;
+    });
 
-  map.whenReady(function() {
-    for (var i=0; i < bounds.length; ++i) {
-      const label = 'Gegenkundgebung #'+(i+1)
-      const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
-      var a = L.latLng(bounds[i][0],bounds[i][1]);
-      var b = L.latLng(bounds[i][2],bounds[i][3]);
-      var bound = L.latLngBounds(a,b);
-      let textBox = L.svgLabelledTextBox(bound, label, text).addTo(map)
+    const container = document.getElementById('container');
+    const inputColor = document.getElementById('textboxColor');
+    const inputText = document.getElementById('textboxLabel');
+    const textarea = document.getElementById('textboxContent');
 
-      // enable editor on click
-      textBox.on('click', e => {
-        if (map.currentEditor) {
-          map.currentEditor.disable();
-        }
-        console.log("click feature")
-        textBox.enableEdit();
-        map.currentEditor = textBox.editor;
-        L.DomEvent.stopPropagation(e)
-      });
+    textBox.on('editable:enable', e=> {
+      let editor =  textBox.editor
 
-      textBox.on('add', e => {
-        console.log("added feature")
-        this.map.currentEditor = this;
-      });
+      // container style
+      container.style.display = 'flex';
 
-      const container = document.getElementById('container');
-      const inputColor = document.getElementById('textboxColor');
-      const inputText = document.getElementById('textboxLabel');
-      const textarea = document.getElementById('textboxContent');
+      // prefill values
+      inputText.value = textBox.label();
+      textarea.value = textBox.text();
+      inputColor.value = textBox.color();
 
-      textBox.on('editable:enable', e=> {
-        let editor =  textBox.editor
+      // register listeners for inputs
+      L.DomEvent.addListener(inputColor, 'input', editor.onColorChange, editor);
+      L.DomEvent.addListener(inputText, 'keyup', editor.onLabelChange, editor);
+      L.DomEvent.addListener(textarea, 'keyup', editor.onTextChange, editor);
+    });
 
-        // container style
-        container.style.display = 'flex';
+    textBox.on('editable:disable', e=> {
+      let editor =  textBox.editor
 
-        // prefill values
-        inputText.value = textBox.label();
-        textarea.value = textBox.text();
-        inputColor.value = textBox.color();
+      textBox.setStyle({color: 'transparent'});
 
-        // register listeners for inputs
-        L.DomEvent.addListener(inputColor, 'input', editor.onColorChange, editor);
-        L.DomEvent.addListener(inputText, 'keyup', editor.onLabelChange, editor);
-        L.DomEvent.addListener(textarea, 'keyup', editor.onTextChange, editor);
-      });
-
-      textBox.on('editable:disable', e=> {
-        let editor =  textBox.editor
-
-        textBox.setStyle({color: 'transparent'});
-
-        // deregister listeners for inputs
-        L.DomEvent.removeListener(inputColor, 'input', editor.onColorChange, editor);
-        L.DomEvent.removeListener(inputText, 'keyup', editor.onLabelChange, editor);
-        L.DomEvent.removeListener(textarea, 'keyup', editor.onTextChange, editor);
-      });
-
-    }
-  });
+      // deregister listeners for inputs
+      L.DomEvent.removeListener(inputColor, 'input', editor.onColorChange, editor);
+      L.DomEvent.removeListener(inputText, 'keyup', editor.onLabelChange, editor);
+      L.DomEvent.removeListener(textarea, 'keyup', editor.onTextChange, editor);
+    });
+  }
+});
   </script>
 </html>
 

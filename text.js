@@ -1,4 +1,5 @@
 import 'leaflet'
+import './text.css'
 
 
 
@@ -12,6 +13,7 @@ const SVGText = L.SVGOverlay.extend({
 
     this.svg = this._createSVG(50, 100)
     this.svg.setAttribute('overflow', 'visible')
+    this.svg.setAttribute('class', 'SVGText')
 
     this.color = options.color || '#FF0000';
     this.label = 'Headline'
@@ -33,7 +35,7 @@ const SVGText = L.SVGOverlay.extend({
 
     // debug rectangle
     if (this.debug) {
-      innerHTML += `<rect style="fill:none; stroke: black" x="0" y="0" width="100%" height="100%" />\n`
+      innerHTML += `<rect x="0" y="0" width="100%" height="100%" />\n`
     }
 
     // label (with colored halo effect powered by css (as svg filters don't

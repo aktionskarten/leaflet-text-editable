@@ -1,0 +1,14 @@
+svg.SVGText text.label {
+  color: "#fff";
+  stroke: 'black';
+  fill: white
+}
+
+svg.SVGText text.content {
+  text-shadow: 5px 5px 10px #fff, 5px -5px 5px #fff, -5px 5px 5px #fff,-5px -5px 5px #fff;
+}
+
+svg.SVGText rect {
+  fill:none;
+  stroke: black
+}
