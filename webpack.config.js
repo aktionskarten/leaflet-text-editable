@@ -1,13 +1,14 @@
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path');
 const webpack = require('webpack');
-const fs = require("fs")
 
 module.exports = {
   entry: {
     main: './src/editor.js',
-    demo: './examples/demo.js',
+    simple: './examples/simple/main.js',
+    editable: './examples/editable/main.js',
+    styleeditor: './examples/styleeditor/main.js',
   },
   mode: 'development',
   output: {
@@ -18,10 +19,22 @@ module.exports = {
     contentBase: './dist'
   },
   plugins: [
-    new CleanWebpackPlugin(['dist']),
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      template: 'examples/demo.html',
-    })
+      chunks: ['main', 'simple'],
+      template: './examples/simple/index.html',
+      filename: 'simple.html'
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['main', 'editable'],
+      template: './examples/editable/index.html',
+      filename: 'editable.html'
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['main', 'styleeditor'],
+      template: './examples/styleeditor/index.html',
+      filename: 'styleeditor.html'
+    }),
   ],
   module: {
     rules: [

@@ -84,6 +84,12 @@ const SVGText = L.SVGOverlay.extend({
     return this;
   },
 
+  setStyle(style) {
+    if ('color' in style) {
+      this.setColor(style['color']);
+    }
+  },
+
   setColor(color) {
     if (color != this.color) {
       this.color = color;
@@ -136,8 +142,8 @@ const SVGTextBox = L.Rectangle.extend({
     this.overlay = new SVGText(bounds)
 
     // Rectangle for resizing text
-    options['color'] = "transparent"
     L.Rectangle.prototype.initialize.call(this, bounds, options);
+    this.resetStyle();
 
     // add/remove overlay automatically
     this.on('remove', this.overlay.remove, this)
@@ -155,6 +161,19 @@ const SVGTextBox = L.Rectangle.extend({
       const bounds = L.latLngBounds(this.getLatLngs()[0])
       this.overlay.setBounds(bounds);
     }
+  },
+
+  setStyle(style) {
+    console.log("setStyle");
+    if (this.overlay) {
+      this.overlay.setStyle(style);
+    }
+    L.Rectangle.prototype.setStyle.call(this, style);
+  },
+
+  resetStyle(style) {
+    console.log("reset");
+    L.Rectangle.prototype.setStyle.call(this, {'color': 'transparent'});
   },
 
   label() {
