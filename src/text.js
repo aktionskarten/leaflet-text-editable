@@ -186,11 +186,13 @@ const SVGTextBox = L.Rectangle.extend({
 
   setLabel(text) {
     this.overlay.setLabel(text);
+    this.options.label = text
     return this;
   },
 
   setText(text) {
     this.overlay.setText(text);
+    this.options.text = text
     return this;
   },
 

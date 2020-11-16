@@ -42,7 +42,7 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
     });
 
     feature.on('editable:disable', e=> {
-      feature.setStyle({color: 'transparent'});
+      feature.resetStyle();
     });
 
     // Leaflet-Path-Drag support
