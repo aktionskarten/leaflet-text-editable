@@ -9,6 +9,11 @@ import 'leaflet-editable'
 const ScaledRectangleEditor = L.Editable.RectangleEditor.extend({
   ratio: 1,
   extendBounds(e) {
+    if (this.ratio == 0) {
+      L.Editable.RectangleEditor.prototype.extendBounds.call(this, e);
+      return;
+    }
+
     const selected  = e.vertex || this.getLatLngs()[0][0].__vertex;
     const newLatLng = e.latlng || selected.getLatLng();
 
