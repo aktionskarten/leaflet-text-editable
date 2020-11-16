@@ -2,8 +2,6 @@ import 'leaflet'
 import './text.css'
 
 
-
-
 const SVGText = L.SVGOverlay.extend({
   svg: null,
   debug: false,
@@ -164,7 +162,6 @@ const SVGTextBox = L.Rectangle.extend({
   },
 
   setStyle(style) {
-    console.log("setStyle");
     if (this.overlay) {
       this.overlay.setStyle(style);
     }
@@ -172,7 +169,6 @@ const SVGTextBox = L.Rectangle.extend({
   },
 
   resetStyle(style) {
-    console.log("reset");
     L.Rectangle.prototype.setStyle.call(this, {'color': 'transparent'});
   },
 

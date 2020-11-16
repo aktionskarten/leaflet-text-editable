@@ -33,8 +33,8 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
     L.Handler.PathDrag.makeDraggable(feature);
 
     // Once the text is added or changes, we need to adjust our editor rectangle 
-    feature.on('add', this.updateRatio, this);
-    feature.on('text:update', this.updateRatio, this);
+    feature.on('add', this.update, this);
+    feature.on('text:update', this.update, this);
 
     feature.on('editable:enable', e=> {
       feature.setStyle({fillColor: 'transparent', color: feature.color(),  stroke: true});
