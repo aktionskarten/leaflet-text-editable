@@ -9,16 +9,17 @@ const SVGText = L.SVGOverlay.extend({
 
   initialize: function(bounds, options) {
     options = options || {};
+
     this.svg = this._createSVG(50, 100)
     this.svg.setAttribute('overflow', 'visible')
+
     this.color = options.color || '#FF0000';
-
-    this.setLabel('Headline')
-    this.setText('Dummy content')
-
-    L.SVGOverlay.prototype.initialize.call(this, this.svg, bounds, options);
+    this.label = 'Headline'
+    this.text = 'Dummy content'
 
     this.on('add', this.redraw, this);
+
+    L.SVGOverlay.prototype.initialize.call(this, this.svg, bounds, options);
   },
 
   _createSVG(width, height) {
@@ -102,6 +103,7 @@ const SVGText = L.SVGOverlay.extend({
     // don't actually show our intermediate svg
     elem.setAttribute('visibility', 'hidden')
 
+    // let the browser calculate the size by adding it temporarily to our map
     const container = this._map._container
     container.appendChild(elem)
     this.render(elem);
