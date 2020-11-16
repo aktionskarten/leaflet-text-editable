@@ -10,7 +10,7 @@ editing these text boxes through leaflet-editable is suported.
 
 ## Demo
 
-See the following example for demonstration: https://github.com/aktionskarten/leaflet-text-editable
+See the following example for demonstration: https://aktionskarten.github.io/leaflet-text-editable/ 
 
 
 ## Install
