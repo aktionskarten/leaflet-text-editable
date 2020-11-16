@@ -1,4 +1,3 @@
-//http://www.crmarsh.com/svg-performance/
 import 'leaflet'
 
 
@@ -37,7 +36,7 @@ const SVGText = L.SVGOverlay.extend({
     }
 
     // label (with colored halo effect powered by css (as svg filters don't
-    // perform well)
+    // perform well - see http://www.crmarsh.com/svg-performance)
     if (this.label) {
       const coords = [[2,2,],[2,-2],[-2,2],[-2,-2]];
       const shadows = coords.map(coords => `${coords[0]}px ${coords[1]}px 5px ${this.color}`);
@@ -125,14 +124,11 @@ const SVGText = L.SVGOverlay.extend({
 
 
 const SVGTextBox = L.Rectangle.extend({
-  initialize(latlng, scale, options) {
+  initialize(bounds, options) {
     options = options || {}
-
-    this.scale = scale || 1;
 
     // Use embedded text functionaliy of SVG element to render text
     // Display it then with help of SVG overlay.
-    const bounds = L.latLngBounds(latlng, latlng);
     this.overlay = new SVGText(bounds)
 
     // Rectangle for resizing text
@@ -143,33 +139,10 @@ const SVGTextBox = L.Rectangle.extend({
     this.on('remove', this.overlay.remove, this)
     this.on('add',(e) => {
       this.overlay.addTo(this._map)
-      this.refresh();
     })
 
     // Bubble change events up
     this.overlay.on('text:update', this.fire, this);
-  },
-
-  refresh() {
-    this.setBounds(this.getBounds())
-  },
-
-  setBounds(bounds) {
-    if (bounds.equals(L.latLngBounds([[0,0], [0,0]]))) {
-      console.log("bounds", bounds)
-      console.warn("invalid bounds");
-      return;
-    }
-
-    const northWest = bounds.getNorthWest();
-    const topLeft = this._map.latLngToLayerPoint(northWest);
-    const svgSize = this.overlay.getSize().multiplyBy(this.scale);
-    const bottomRight = topLeft.add(svgSize);
-    const southEast = this._map.layerPointToLatLng(bottomRight);
-    bounds = L.latLngBounds(northWest, southEast);
-    this.overlay.setBounds(bounds);
-
-    L.Rectangle.prototype.setBounds.call(this, bounds);
   },
 
   redraw() {
@@ -177,6 +150,9 @@ const SVGTextBox = L.Rectangle.extend({
     if (this._map && this._map.hasLayer(this.overlay)) {
       const bounds = L.latLngBounds(this.getLatLngs()[0])
       this.overlay.setBounds(bounds);
+      const northEast = bounds.getNorthEast()
+      const southWest = bounds.getSouthWest()
+      console.log("changed", northEast.lat, northEast.lng, southWest.lat, southWest.lng)
     }
   },
 
@@ -225,7 +201,7 @@ const SVGTextBox = L.Rectangle.extend({
 
 
 const svgText = (text, options) => new SVGText(text, options)
-const svgTextBox = (latlng, text, options) => (new SVGTextBox(latlng, options)).setText(text)
-const svgLabelledTextBox = (latlng, scale, label, text, options) => (new SVGTextBox(latlng, scale, options)).setLabel(label).setText(text)
+const svgTextBox = (bounds, text, options) => (new SVGTextBox(bounds, options)).setText(text)
+const svgLabelledTextBox = (bounds, label, text, options) => (new SVGTextBox(bounds, options)).setLabel(label).setText(text)
 
 export {svgLabelledTextBox, svgTextBox, SVGTextBox, svgText, SVGText}
