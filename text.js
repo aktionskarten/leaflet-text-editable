@@ -154,9 +154,6 @@ const SVGTextBox = L.Rectangle.extend({
     if (this._map && this._map.hasLayer(this.overlay)) {
       const bounds = L.latLngBounds(this.getLatLngs()[0])
       this.overlay.setBounds(bounds);
-      const northEast = bounds.getNorthEast()
-      const southWest = bounds.getSouthWest()
-      console.log("changed", northEast.lat, northEast.lng, southWest.lat, southWest.lng)
     }
   },
 
