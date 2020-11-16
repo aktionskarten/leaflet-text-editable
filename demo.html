@@ -15,7 +15,7 @@ svg text.content {
     <div id="container" style="display: none; width: 100%; height: 50px">
       <input id="textboxColor" type="color" style="height:100%">
       <input id="textboxLabel" type="text" style="height:100%">
-      <textarea id="textbox" style="display:block;width:100%">Type in your stuff</textarea>
+      <textarea id="textboxContent" style="display:block;width:100%">Type in your stuff</textarea>
     </div>
     <div id="map" style="width:100%; height: 100%"></div>
   </body>
@@ -59,6 +59,7 @@ svg text.content {
 
     map.addControl(new SVGControl());
 
+    // disable editor if you click on the map
     map.on('click', e => {
       console.log("click map")
       let tools = e.sourceTarget.editTools;
@@ -79,8 +80,9 @@ bounds = [
       var a = L.latLng(bounds[i][0],bounds[i][1]);
       var b = L.latLng(bounds[i][2],bounds[i][3]);
       var bound = L.latLngBounds(a,b);
-      console.log(bound)
       let textBox = L.svgLabelledTextBox(bound, label, text).addTo(map)
+
+      // enable editor on click
       textBox.on('click', e => {
         if (map.currentEditor) {
           map.currentEditor.disable();
@@ -90,6 +92,45 @@ bounds = [
         map.currentEditor = textBox.editor;
         L.DomEvent.stopPropagation(e)
       });
+
+      textBox.on('add', e => {
+        console.log("added feature")
+        this.map.currentEditor = this;
+      });
+
+      const container = document.getElementById('container');
+      const inputColor = document.getElementById('textboxColor');
+      const inputText = document.getElementById('textboxLabel');
+      const textarea = document.getElementById('textboxContent');
+
+      textBox.on('editable:enable', e=> {
+        let editor =  textBox.editor
+
+        // container style
+        container.style.display = 'flex';
+
+        // prefill values
+        inputText.value = textBox.label();
+        textarea.value = textBox.text();
+        inputColor.value = textBox.color();
+
+        // register listeners for inputs
+        L.DomEvent.addListener(inputColor, 'input', editor.onColorChange, editor);
+        L.DomEvent.addListener(inputText, 'keyup', editor.onLabelChange, editor);
+        L.DomEvent.addListener(textarea, 'keyup', editor.onTextChange, editor);
+      });
+
+      textBox.on('editable:disable', e=> {
+        let editor =  textBox.editor
+
+        textBox.setStyle({color: 'transparent'});
+
+        // deregister listeners for inputs
+        L.DomEvent.removeListener(inputColor, 'input', editor.onColorChange, editor);
+        L.DomEvent.removeListener(inputText, 'keyup', editor.onLabelChange, editor);
+        L.DomEvent.removeListener(textarea, 'keyup', editor.onTextChange, editor);
+      });
+
     }
   });
   </script>

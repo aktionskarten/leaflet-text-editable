@@ -4,14 +4,11 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './editor.js',
+  entry: './demo.js',
   mode: 'development',
   output: {
+    path: path.resolve(__dirname, './dist'),
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    library: 'leaflet-text-overlay',
-    libraryTarget: 'umd',
-    globalObject: 'this'
   },
   devServer: {
     contentBase: './dist'

@@ -1,7 +1,5 @@
-import 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 import 'leaflet-editable'
-import 'leaflet-path-drag'
 
 import {ScaledRectangleEditor} from './rect'
 import {svgTextBox, svgLabelledTextBox, SVGTextBox} from './text'
@@ -32,56 +30,19 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
   initialize: function(map, feature, options) {
     L.Editable.RectangleEditor.prototype.initialize.call(this, map, feature, options);
 
-    if (this.map.currentEditor) {
-      this.map.currentEditor.disable();
-    }
-    this.map.currentEditor = this;
-
     L.Handler.PathDrag.makeDraggable(feature);
-
-    feature.on('click',(e)=>{
-      if (!feature.editEnabled()) {
-        feature.enableEdit(map);
-      }
-      L.DomEvent.stopPropagation(e)
-    });
-
-    const container = document.getElementById('container');
-    const inputColor = document.getElementById('textboxColor');
-    const inputText = document.getElementById('textboxLabel');
-    const textbox = document.getElementById('textbox');
 
     // Once the text is added or changes, we need to adjust our editor rectangle 
     feature.on('add', this.updateRatio, this);
     feature.on('text:update', this.updateRatio, this);
 
     feature.on('editable:enable', e=> {
-      // input style
       feature.setStyle({fillColor: 'transparent', color: feature.color(),  stroke: true});
-      container.style.display = 'flex';
-
       this.updateRatio();
-
-      // prefill values
-      inputText.value = feature.label();
-      textbox.value = feature.text();
-      inputColor.value = feature.color();
-
-      // register listeners for inputs
-      L.DomEvent.addListener(inputColor, 'input', this.onColorChange, this);
-      L.DomEvent.addListener(inputText, 'keyup', this.onLabelChange, this);
-      L.DomEvent.addListener(textbox, 'keyup', this.onTextChange, this);
     });
 
     feature.on('editable:disable', e=> {
-      // restore input style
       feature.setStyle({color: 'transparent'});
-      container.style.display = 'none';
-
-      // deregister listeners for inputs
-      L.DomEvent.removeListener(inputColor, 'input', this.onColorChange, this);
-      L.DomEvent.removeListener(inputText, 'keyup', this.onLabelChange, this);
-      L.DomEvent.removeListener(textbox, 'keyup', this.onTextChange, this);
     });
 
     // Leaflet-Path-Drag support
