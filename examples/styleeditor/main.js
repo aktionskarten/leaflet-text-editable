@@ -28,6 +28,7 @@ const styleEditor = new L.Control.StyleEditor({
   colorRamp: [
     '#e04f9e', '#fe0000', '#ee9c00', '#ffff00', '#00e13c', '#00a54c', '#00adf0', '#7e55fc', '#1f4199', '#7d3411'
   ],
+  openOnLeafletEditable: false,
   useGrouping: false, // otherwise a change style applies to all
                       // auto-added featues
 });
@@ -51,6 +52,37 @@ const bounds = [
   [[52.50998775888057,13.444347381591799],[52.50611297738362,13.427524566650392]],
 ]
 
+const clickHandler = function(e) {
+  console.log("click feature")
+
+  const current = styleEditor.options.util.getCurrentElement();
+  if (current && current.editor) {
+    current.editor.disable();
+  }
+
+  this.enableEdit();
+
+  styleEditor.initChangeStyle({'target': this});
+  styleEditor.options.util.setCurrentElement(this);
+
+  L.DomEvent.stopPropagation(e)
+}
+
+map.on('editable:drawing:start', e => {
+  const current = styleEditor.options.util.getCurrentElement();
+  if (current && current.editor) {
+    current.editor.disable();
+  }
+  styleEditor.hideEditor();
+});
+
+map.on('editable:drawing:commit', e => {
+  const textBox = e.layer;
+  textBox.on('click', clickHandler, textBox);
+  styleEditor.initChangeStyle({'target': textBox});
+  styleEditor.options.util.setCurrentElement(textBox);
+});
+
 map.whenReady(function() {
   for (let i=0; i < bounds.length; ++i) {
     const label = 'Gegenkundgebung #'+(i+1)
@@ -59,20 +91,6 @@ map.whenReady(function() {
     const bounds_ = L.latLngBounds(a,b);
     let textBox = L.svgLabelledTextBox(bounds_, label, text).addTo(map)
 
-    textBox.on('click', e => {
-      console.log("click feature")
-
-      let current = styleEditor.options.util.getCurrentElement();
-      if (current && current.editor) {
-        current.editor.disable();
-      }
-
-      textBox.enableEdit();
-
-      styleEditor.initChangeStyle({'target': textBox});
-      styleEditor.options.util.setCurrentElement(textBox);
-
-      L.DomEvent.stopPropagation(e)
-    });
+    textBox.on('click', clickHandler, textBox);
   }
 });

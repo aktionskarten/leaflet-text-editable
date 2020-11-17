@@ -150,7 +150,9 @@ const SVGTextBox = L.Rectangle.extend({
     })
 
     // Bubble change events up
-    this.overlay.on('text:update', this.fire, this);
+    this.overlay.on('text:update', (e) => {
+      this.fire('text:update');
+    });
   },
 
   redraw() {
