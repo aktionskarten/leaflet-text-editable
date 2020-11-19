@@ -1,32 +1,10 @@
 import L from 'leaflet'
 import 'leaflet-editable'
+import 'leaflet-path-drag'
+import {ScaledRectangleEditor} from 'leaflet-editable-scaled-rect'
+import {SVGTextBox} from 'leaflet-text'
 
-import {ScaledRectangleEditor} from './rect'
-import {svgTextBox, svgLabelledTextBox, SVGTextBox} from './text'
-
-L.svgTextBox = svgTextBox
-L.svgLabelledTextBox = svgLabelledTextBox
-
-SVGTextBox.include({
-  getEditorClass: function (tools) {
-    return (tools && tools.options.svgTextBoxEditorClass) ? tools.options.svgTextBoxEditorClass : L.Editable.SVGTextBoxEditor;
-  }
-});
-
-L.Editable.include({
-  createSVGTextBox(bounds, options) {
-    return this.createLayer(SVGTextBox, bounds, options);
-  },
-  startSVGTextBox(latlng, options) {
-    const corner = latlng || L.latLng([0, 0]);
-    const bounds = L.latLngBounds(corner, corner);
-    const textBox = this.createSVGTextBox(bounds, options);
-    textBox.enableEdit(this.map).startDrawing();
-    return textBox;
-  }
-});
-
-L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
+const SVGTextBoxEditor = ScaledRectangleEditor.extend({
   initialize: function(map, feature, options) {
     L.Editable.RectangleEditor.prototype.initialize.call(this, map, feature, options);
 
@@ -90,4 +68,10 @@ L.Editable.SVGTextBoxEditor = ScaledRectangleEditor.extend({
   }
 });
 
-export default L
+SVGTextBox.include({
+  getEditorClass: function (tools) {
+    return (tools && tools.options.svgTextBoxEditorClass) ? tools.options.svgTextBoxEditorClass : SVGTextBoxEditor;
+  }
+});
+
+export {SVGTextBoxEditor}

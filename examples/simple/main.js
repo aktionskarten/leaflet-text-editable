@@ -1,5 +1,6 @@
-import L from '@/editor.js'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import {svgLabelledTextBox} from 'leaflet-text'
 
 const map = L.map('map');
 
@@ -16,5 +17,5 @@ map.whenReady(function() {
   const label = 'Headline'
   const text = 'My wonderful content'
   const bounds = L.latLngBounds([52.50998775888057,13.444347381591799],[52.50611297738362,13.427524566650392]);
-  L.svgLabelledTextBox(bounds, label, text).addTo(map)
+  svgLabelledTextBox(bounds, label, text).addTo(map)
 });

@@ -1,3 +1,6 @@
+import L from 'leaflet'
+import 'leaflet-styleeditor'
+
 const InputElement = L.StyleEditor.formElements.FormElement.extend({
   options: {
     title: 'Label'

@@ -1,9 +1,13 @@
-import {L, SVGControl} from '@/index.js'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-editable'
 import 'leaflet-path-drag'
 import 'leaflet-styleeditor'
 import 'leaflet-styleeditor/dist/css/Leaflet.StyleEditor.min.css'
+import {svgLabelledTextBox, TextControl, SVGTextBoxEditableMixin} from '@/index.js'
 import {InputElement, TextAreaElement} from './forms'
+
+L.Editable.include(SVGTextBoxEditableMixin);
 
 const map = L.map('map', {editable: true});
 map.setView([52.5069,13.4298], 15);
@@ -34,8 +38,8 @@ const styleEditor = new L.Control.StyleEditor({
 });
 map.addControl(styleEditor);
 
-const svgControl = new SVGControl()
-map.addControl(svgControl);
+const textControl = new TextControl()
+map.addControl(textControl);
 
 // disable editors if you click on the map
 map.on('click', e => {
@@ -89,7 +93,7 @@ map.whenReady(function() {
     const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
     const [a,b] = bounds[i];
     const bounds_ = L.latLngBounds(a,b);
-    let textBox = L.svgLabelledTextBox(bounds_, label, text).addTo(map)
+    let textBox = svgLabelledTextBox(bounds_, label, text).addTo(map)
 
     textBox.on('click', clickHandler, textBox);
   }

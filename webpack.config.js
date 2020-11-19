@@ -63,8 +63,10 @@ module.exports = {
     ]
   },
   resolve: {
+    symlinks: false,
+    modules: [path.resolve('node_modules')],
     alias: {
       '@': path.resolve(__dirname, './src/'),
     },
-  },
+  }
 };

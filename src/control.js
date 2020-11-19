@@ -1,6 +1,6 @@
-import 'leaflet'
+import L from 'leaflet'
 
-const SVGControl = L.Control.extend({
+const TextControl = L.Control.extend({
   options: {
     kind: 'text',
     title: '',
@@ -26,4 +26,4 @@ const SVGControl = L.Control.extend({
   }
 });
 
-export { SVGControl }
+export { TextControl }

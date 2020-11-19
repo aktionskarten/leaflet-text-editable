@@ -1,6 +1,8 @@
-import L from '@/editor.js'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-editable'
 import 'leaflet-path-drag'
+import {svgLabelledTextBox} from '@/index.js'
 
 const map = L.map('map', {editable: true});
 
@@ -13,7 +15,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a> '
 }).addTo(map);
 
-const SVGControl = L.Control.extend({
+const TextControl = L.Control.extend({
   options: {
     kind: 'text',
     title: '',
@@ -39,7 +41,7 @@ const SVGControl = L.Control.extend({
   }
 });
 
-map.addControl(new SVGControl());
+map.addControl(new TextControl());
 
 // disable editor if you click on the map
 map.on('click', e => {
@@ -61,7 +63,7 @@ map.whenReady(function() {
     const text = '12:00 | Alexanderplatz\n„Alle gegen Alle“'
     const [a,b] = bounds[i];
     const bounds_ = L.latLngBounds(a,b);
-    let textBox = L.svgLabelledTextBox(bounds_, label, text).addTo(map)
+    let textBox = svgLabelledTextBox(bounds_, label, text).addTo(map)
 
     // enable editor on click
     textBox.on('click', e => {
