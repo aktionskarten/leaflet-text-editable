@@ -8,7 +8,6 @@ Editable.
 
 See the following examples for demonstration:
 
-* https://aktionskarten.github.io/leaflet-text-editable/simple.html
 * https://aktionskarten.github.io/leaflet-text-editable/editable.html
 * https://aktionskarten.github.io/leaflet-text-editable/styleeditor.html
 

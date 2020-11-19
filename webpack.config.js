@@ -6,7 +6,6 @@ const webpack = require('webpack');
 module.exports = {
   entry: {
     main: './src/editor.js',
-    simple: './examples/simple/main.js',
     editable: './examples/editable/main.js',
     styleeditor: './examples/styleeditor/main.js',
   },
@@ -20,11 +19,6 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(),
-    new HtmlWebpackPlugin({
-      chunks: ['main', 'simple'],
-      template: './examples/simple/index.html',
-      filename: 'simple.html'
-    }),
     new HtmlWebpackPlugin({
       chunks: ['main', 'editable'],
       template: './examples/editable/index.html',
