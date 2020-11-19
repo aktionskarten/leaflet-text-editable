@@ -6,10 +6,10 @@
   "dependencies": {
     "leaflet": "^1.7.1",
     "leaflet-editable": "^1.2.0",
-    "leaflet-editable-scaled-rect": "0.0.0",
+    "leaflet-editable-scaled-rect": "0.0.1",
     "leaflet-path-drag": "^1.1.0",
     "leaflet-styleeditor": "^0.1.21",
-    "leaflet-text": "0.0.1"
+    "leaflet-text": "0.0.2"
   },
   "devDependencies": {
     "@ava/babel-preset-stage-4": "^4.0.0",
